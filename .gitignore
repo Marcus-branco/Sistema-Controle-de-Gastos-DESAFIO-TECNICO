@@ -365,3 +365,4 @@ MigrationBackup/
 FodyWeavers.xsdconnections.cs 
 ConexaoBanco.cs 
 ConexaoBanco.cs 
+dbConnection.cs 
