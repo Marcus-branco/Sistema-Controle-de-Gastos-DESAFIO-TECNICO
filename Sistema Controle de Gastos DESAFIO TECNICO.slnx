@@ -1,6 +1,5 @@
 <Solution>
   <Folder Name="/Itens de Solução/">
-    <File Path="appsettings.json" />
     <File Path="connections.cs" />
   </Folder>
   <Folder Name="/Solution Items/">
