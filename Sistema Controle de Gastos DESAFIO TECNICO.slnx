@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/Itens de Solução/">
+    <File Path="appsettings.json" />
+    <File Path="connections.cs" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+  </Folder>
+  <Project Path="Sistema Controle de Gastos DESAFIO TECNICO/Sistema Controle de Gastos DESAFIO TECNICO.csproj" />
+</Solution>
