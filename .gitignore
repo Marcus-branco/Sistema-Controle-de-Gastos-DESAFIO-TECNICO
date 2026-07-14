@@ -362,4 +362,6 @@ MigrationBackup/
 .ionide/
 
 # Fody - auto-generated XML schema
-FodyWeavers.xsd
+FodyWeavers.xsdconnections.cs 
+ConexaoBanco.cs 
+ConexaoBanco.cs 

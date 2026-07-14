@@ -1,10 +1,7 @@
 <Solution>
-  <Folder Name="/Itens de Solução/">
-    <File Path="connections.cs" />
-    <File Path="temp.txt" />
-  </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
+    <File Path="connections.cs" />
   </Folder>
   <Project Path="Sistema Controle de Gastos DESAFIO TECNICO/Sistema Controle de Gastos DESAFIO TECNICO.csproj" />
 </Solution>
