@@ -1,37 +1,44 @@
-using MySql.Data.MySqlClient;
-using Mysqlx.Prepare;
+﻿using MySql.Data.MySqlClient;
 using System.Data;
-using System.Data.Common;
+using System.IO.Pipelines;
 
-namespace Sistema_Controle_de_Gastos_DESAFIO_TECNICO
+namespace Sistema_Controle_de_Gastos_DESAFIO_TECNICO.Forms
 {
-    public partial class Form1 : Form
+    public partial class FormTransacao : Form
     {
-        public Form1()
+        public FormTransacao()
         {
             InitializeComponent();
+            listViewTransaçõesXPessoas.View = View.Details;
+            listViewTransaçõesXPessoas.LabelEdit = true;
+            listViewTransaçõesXPessoas.AllowColumnReorder = true;
+            listViewTransaçõesXPessoas.FullRowSelect = true;
+            listViewTransaçõesXPessoas.GridLines = true;
+            listViewTransaçõesXPessoas.Columns.Add("ID", 30, HorizontalAlignment.Left);
+            listViewTransaçõesXPessoas.Columns.Add("Nome", 150, HorizontalAlignment.Left);
+            listViewTransaçõesXPessoas.Columns.Add("Idade", 60, HorizontalAlignment.Left);
+            listViewTransaçõesXPessoas.Columns.Add("Nro Transação", 100, HorizontalAlignment.Left);
+            listViewTransaçõesXPessoas.Columns.Add("Descrição", 150, HorizontalAlignment.Left);
+            listViewTransaçõesXPessoas.Columns.Add("Tipo", 100, HorizontalAlignment.Left);
+            listViewTransaçõesXPessoas.Columns.Add("Valor", 60, HorizontalAlignment.Left);
 
-            //  Configurar Lista da Consulta de despesas
-            listConsulta.View = View.Details;
-            listConsulta.LabelEdit = true;
-            listConsulta.AllowColumnReorder = true;
-            listConsulta.FullRowSelect = true;
-            listConsulta.GridLines = true;
-            listConsulta.Columns.Add("ID", 30, HorizontalAlignment.Left);
-            listConsulta.Columns.Add("Nome", 150, HorizontalAlignment.Left);
-            listConsulta.Columns.Add("Idade", 50, HorizontalAlignment.Left);
-            listConsulta.Columns.Add("Nro despesa", 100, HorizontalAlignment.Left);
-            listConsulta.Columns.Add("Descrição despesa", 150, HorizontalAlignment.Left);
-            listConsulta.Columns.Add("Tipo despesa", 150, HorizontalAlignment.Left);
-            listConsulta.Columns.Add("Valor", 150, HorizontalAlignment.Left);
-
-            carregar_despesas();    //Carrega consulta de despesas ao abrir o sistema
+            carregar_TransacaoxPessoa();
         }
 
         string data_source = Conexoes.dbConexao();
         MySqlConnection Conexao;
 
-        private void btnSalvarDespesa_Click(object sender, EventArgs e)
+        private void buttonMenu_Click(object sender, EventArgs e)
+        {
+            FormMenu FormMenu = new FormMenu();
+            FormMenu.Dock = DockStyle.Fill;
+            FormMenu.TopLevel = false;
+            FormMain.MainPanel.Controls.Clear();
+            FormMain.MainPanel.Controls.Add(FormMenu);
+            FormMenu.Show();
+        }
+
+        private void buttonSalvarTransacao_Click(object sender, EventArgs e)
         {
             try
             {
@@ -42,30 +49,60 @@ namespace Sistema_Controle_de_Gastos_DESAFIO_TECNICO
 
                 cmd.Connection = Conexao;
 
+                /*cmd.CommandText =   "SELECT id_pessoa FROM pessoa " +
+                                    "WHERE nome LIKE @q " +
+                                    "OR id_pessoa = @q2 ;";
+                cmd.Parameters.AddWithValue("@q", $"%{txtIdPessoa.Text}%");
+                cmd.Parameters.AddWithValue("q2", txtIdPessoa.Text);
+                
+                cmd.Prepare();
+                MySqlDataReader reader = cmd.ExecuteReader();
+                reader.Read();
+                
+                string pessoa = reader["id_pessoa"].ToString();
+               
+                if (pessoa == null ) 
+                {
+                    throw new Exception("Por favor insira uma pessoa válida.");
+                }
+                MessageBox.Show("Passou pelo IF");
+                */
+
                 // Insert no banco de dados
-                cmd.CommandText =   "INSERT INTO pessoa(nome, idade) VALUES (@nome, @idade)";
-                cmd.Parameters.AddWithValue("@nome", txtNomePessoa.Text);
-                cmd.Parameters.AddWithValue("@idade", txtIdadePessoa.Text);
+                cmd.CommandText =   "INSERT INTO despesa(id_pessoa, descricao_despesa, valor_transacao, tipo_transacao) " +
+                                    "VALUES (@id_pessoa, @descricao_despesa, @valor_transacao, @tipo_transacao);";
+                cmd.Parameters.AddWithValue("@id_pessoa", $"{pessoa}");
+                cmd.Parameters.AddWithValue("@descricao_despesa", txtDescricaoTransacao.Text);
+                cmd.Parameters.AddWithValue("@valor_transacao", txtValorTransacao.Text);
+                cmd.Parameters.AddWithValue("@tipo_transacao", listTipoTransacao.Text);
+
 
                 cmd.Prepare();
                 cmd.ExecuteNonQuery();
 
-                carregar_despesas();
+                MessageBox.Show("Transação cadastrada com sucesso!");
 
+                carregar_TransacaoxPessoa(); // Carregar a lista de pessoas
+
+                //  Apagar campos de cadastro
+                listPessoaTransacao.Text = "";
+                listTipoTransacao.Text = "";
+                txtValorTransacao.Text = "";
+                txtDescricaoTransacao.Text = "";
 
             }
             catch (MySqlException ex)
             {
                 MessageBox.Show("Erro " + ex.Number + " ocorreu: " + ex.Message,
-                                "Erro", 
-                                MessageBoxButtons.OK, 
+                                "Erro",
+                                MessageBoxButtons.OK,
                                 MessageBoxIcon.Error);
-                
+
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show("Ocorreu um Erro  " + ex.Message,
-                                "Erro",    
+                                "Erro",
                                 MessageBoxButtons.OK,
                                 MessageBoxIcon.Information);
             }
@@ -75,7 +112,7 @@ namespace Sistema_Controle_de_Gastos_DESAFIO_TECNICO
             }
         }
 
-        private void btnConsultarDespesa_Click(object sender, EventArgs e)
+        private void buttonPesquisarTransacao_Click(object sender, EventArgs e)
         {
             try
             {
@@ -87,18 +124,18 @@ namespace Sistema_Controle_de_Gastos_DESAFIO_TECNICO
                 cmd.Connection = Conexao;
 
                 // Select no banco de dados
-                cmd.CommandText =   "SELECT a.id_pessoa, a.nome, a.idade, b.id_despesa, " +
+                cmd.CommandText = "SELECT a.id_pessoa, a.nome, a.idade, b.id_despesa, " +
                                     "b.descricao_despesa, b.tipo_transacao, b.valor_transacao " +
                                     "FROM pessoa a LEFT OUTER JOIN despesa b ON a.id_pessoa = b.id_pessoa " +
                                     "WHERE a.id_pessoa LIKE @q " +
                                     "OR a.nome LIKE @q;";
-                cmd.Parameters.AddWithValue("@q", $"%{txtBuscar.Text}%");
+                cmd.Parameters.AddWithValue("@q", $"%{txtConsulta.Text}%");
 
                 cmd.Prepare();
 
                 MySqlDataReader reader = cmd.ExecuteReader();   // Executar reader com o valor de retorno do comando
 
-                listConsulta.Items.Clear();   //Limpa a consulta pré-existente
+                listViewTransaçõesXPessoas.Items.Clear();   //Limpa a consulta pré-existente
 
                 while (reader.Read())   // Enquanto existir linhas para ler, executa o bloco abaixo 
                 {
@@ -113,9 +150,8 @@ namespace Sistema_Controle_de_Gastos_DESAFIO_TECNICO
                     item.SubItems.Add(reader["tipo_transacao"].ToString());
                     item.SubItems.Add(reader["valor_transacao"].ToString());
 
-                    listConsulta.Items.Add(item);    //Cria linha para a Lista de consulta  
+                    listViewTransaçõesXPessoas.Items.Add(item);    //Cria linha para a Lista de consulta  
                 }
-
             }
             catch (MySqlException ex)
             {
@@ -134,7 +170,7 @@ namespace Sistema_Controle_de_Gastos_DESAFIO_TECNICO
                 Conexao.Close();
             }
         }
-        private void carregar_despesas()
+        private void carregar_TransacaoxPessoa()
         {
             Conexao = new MySqlConnection(data_source);
             Conexao.Open();
@@ -153,7 +189,7 @@ namespace Sistema_Controle_de_Gastos_DESAFIO_TECNICO
 
             MySqlDataReader reader = cmd.ExecuteReader();   // Executar reader com o valor de retorno do comando
 
-            listConsulta.Items.Clear();   //Limpa a consulta pré-existente
+            listViewTransaçõesXPessoas.Items.Clear();   //Limpa a consulta pré-existente
 
             while (reader.Read())   // Enquanto existir linhas para ler, executa o bloco abaixo 
             {
@@ -168,7 +204,7 @@ namespace Sistema_Controle_de_Gastos_DESAFIO_TECNICO
                 item.SubItems.Add(reader["tipo_transacao"].ToString());
                 item.SubItems.Add(reader["valor_transacao"].ToString());
 
-                listConsulta.Items.Add(item);    //Cria linha para a Lista de consulta  
+                listViewTransaçõesXPessoas.Items.Add(item);    //Cria linha para a Lista de consulta  
             }
         }
     }

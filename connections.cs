@@ -1,5 +1,5 @@
 ﻿using System;
-using Mysql
+using Mysql;
 
 
 namespace Sistema_Controle_de_Gastos_DESAFIO_TECNICO{
