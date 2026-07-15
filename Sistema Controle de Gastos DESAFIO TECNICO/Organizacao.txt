@@ -1,0 +1,46 @@
+﻿>>> adicionar delete de pessoas > transações (Em andamento)
+
+>>> Adicionar formação de DB ao iniciar o projeto pela primeira vez
+
+
+>>> Realizar estilização com react e typescript
+
+
+
+
+usar arquivo entrys (salvo variáveis do banco)
+
+oque queremos salvar?
+	Pessoa > Despesa
+	informações da pessoa
+		Identificador (Id único)
+		Nome
+		Idade
+
+	Informações de despesa
+		ID único despesa
+		Id Único Pessoa
+		Descricao
+		Valor
+		Tipo
+		Pessoa (Deve existir em Pessoas)
+		
+	Tabela Controle
+		Id Pessoa
+		Id Transação
+
+create table pessoa (id_pessoa int auto_increment,
+nome varchar(150),
+idade int(3),
+primary key (id_pessoa)
+);
+
+create table despesa (id_despesa int auto_increment,
+id_pessoa int,
+descricao_despesa varchar(200),
+valor_transacao float,
+tipo_transacao varchar(100),
+primary key (id_despesa)
+);
+
+create table despesa_controle (id_controle int auto_increment,id_despesa int, id_pessoa int, primary key(id_controle));

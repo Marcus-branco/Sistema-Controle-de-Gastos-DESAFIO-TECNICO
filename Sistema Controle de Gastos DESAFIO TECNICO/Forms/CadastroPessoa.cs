@@ -1,5 +1,6 @@
 using MySql.Data.MySqlClient;
 using Sistema_Controle_de_Gastos_DESAFIO_TECNICO.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace Sistema_Controle_de_Gastos_DESAFIO_TECNICO
 {
@@ -18,6 +19,14 @@ namespace Sistema_Controle_de_Gastos_DESAFIO_TECNICO
             listConsulta.Columns.Add("ID", 30, HorizontalAlignment.Left);
             listConsulta.Columns.Add("Nome", 150, HorizontalAlignment.Left);
             listConsulta.Columns.Add("Idade", 40, HorizontalAlignment.Left);
+            listPessoasDelete.View = View.Details;
+            listPessoasDelete.LabelEdit = true;
+            listPessoasDelete.AllowColumnReorder = true;
+            listPessoasDelete.FullRowSelect = true;
+            listPessoasDelete.GridLines = true;
+            listPessoasDelete.Columns.Add("ID", 30, HorizontalAlignment.Left);
+            listPessoasDelete.Columns.Add("Nome", 150, HorizontalAlignment.Left);
+            listPessoasDelete.Columns.Add("Idade", 40, HorizontalAlignment.Left);
 
             carregar_pessoas();    //Carrega consulta de despesas ao abrir o sistema
         }
@@ -169,5 +178,92 @@ namespace Sistema_Controle_de_Gastos_DESAFIO_TECNICO
             FormMain.MainPanel.Controls.Add(FormMenu);
             FormMenu.Show();
         }
+        private void listViewChecked(object sender, EventArgs e)
+        {
+            if (listConsulta.SelectedItems.Count > 0)
+            {
+                // Pega o texto da primeira coluna (SubItems[0] é o texto principal)
+                string pessoaID = listConsulta.SelectedItems[0].SubItems[0].Text;
+                string pessoaNome = listConsulta.SelectedItems[0].SubItems[1].Text;
+                string pessoaIdade = listConsulta.SelectedItems[0].SubItems[2].Text;
+
+                ListViewItem item = new ListViewItem(pessoaID); // 1ª linha
+
+                // Criar colunas subsequentes                    
+                item.SubItems.Add(pessoaNome);
+                item.SubItems.Add(pessoaIdade);
+                listPessoasDelete.Items.Add(item);
+                listConsulta.Items.Remove(listConsulta.SelectedItems[0]);
+            }
+        }
+
+        private void listViewDelete()
+        {
+
+        }
+
+        private void buttonDeletePessoa_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                DialogResult resposta = MessageBox.Show(
+                    $"Deseja realmente excluir {listPessoasDelete.Items.Count} pessoas e seus registros? Esta ação não pode ser desfeita.",
+                    "Confirmação",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question
+                );
+
+                if (resposta == DialogResult.No)
+                {
+                    return;
+                }
+
+                Conexao = new MySqlConnection(data_source);
+                Conexao.Open();
+
+                MySqlCommand cmd = new MySqlCommand();
+
+                cmd.Connection = Conexao;
+
+                for (int i = 0; i < listPessoasDelete.Items.Count; i++) // Itera o bloco abaixo para cada pessoa selecionada
+                {
+                    string pessoaID = listPessoasDelete.Items[i].SubItems[0].Text;
+
+                    cmd.CommandText = "DELETE FROM despesa WHERE id_pessoa = @q;";
+                    // Executa delete no banco de dados
+                    cmd.Parameters.AddWithValue("@q", pessoaID);
+                    cmd.ExecuteNonQuery();
+
+                    cmd.Parameters.Clear();  // Limpa os parâmetros para que o comando de deletar em cascata não gere nenhum erro
+
+                    cmd.CommandText = "DELETE FROM pessoa WHERE id_pessoa = @q;";
+                    cmd.Parameters.AddWithValue("@q", pessoaID);
+                    cmd.ExecuteNonQuery();
+
+                    cmd.Parameters.Clear();
+                }          
+
+                listPessoasDelete.Items.Clear();
+                MessageBox.Show("Registros excluídos com sucesso!");
+            }
+            catch (MySqlException ex)
+            {
+                MessageBox.Show("Erro " + ex.Number + " ocorreu: " + ex.Message,
+                                "Erro",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Error);
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                //Conexao.Close();
+            }
+
+        }
     }
 }
+
