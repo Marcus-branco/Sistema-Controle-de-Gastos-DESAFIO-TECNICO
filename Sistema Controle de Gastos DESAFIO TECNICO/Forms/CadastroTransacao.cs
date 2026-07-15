@@ -1,6 +1,8 @@
 ﻿using MySql.Data.MySqlClient;
 using System.Data;
+using System.Drawing.Text;
 using System.IO.Pipelines;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Sistema_Controle_de_Gastos_DESAFIO_TECNICO.Forms
 {
@@ -23,6 +25,7 @@ namespace Sistema_Controle_de_Gastos_DESAFIO_TECNICO.Forms
             listViewTransaçõesXPessoas.Columns.Add("Valor", 60, HorizontalAlignment.Left);
 
             carregar_TransacaoxPessoa();
+            popularListaPessoa();
         }
 
         string data_source = Conexoes.dbConexao();
@@ -49,29 +52,28 @@ namespace Sistema_Controle_de_Gastos_DESAFIO_TECNICO.Forms
 
                 cmd.Connection = Conexao;
 
-                /*cmd.CommandText =   "SELECT id_pessoa FROM pessoa " +
-                                    "WHERE nome LIKE @q " +
-                                    "OR id_pessoa = @q2 ;";
-                cmd.Parameters.AddWithValue("@q", $"%{txtIdPessoa.Text}%");
-                cmd.Parameters.AddWithValue("q2", txtIdPessoa.Text);
-                
+                cmd.CommandText =   "SELECT id_pessoa, idade FROM pessoa " +
+                                    "WHERE nome LIKE @q;";
+                cmd.Parameters.AddWithValue("@q", comboxPessoa.Text);
+                                
                 cmd.Prepare();
                 MySqlDataReader reader = cmd.ExecuteReader();
                 reader.Read();
-                
-                string pessoa = reader["id_pessoa"].ToString();
-               
-                if (pessoa == null ) 
+
+                int idPessoa = reader.GetOrdinal("id_pessoa");
+                int idadePessoa = reader.GetOrdinal("idade");
+
+                if (idadePessoa < 18 && !string.Equals(listTipoTransacao.Text?.Trim(), "Despesa", StringComparison.OrdinalIgnoreCase))
                 {
-                    throw new Exception("Por favor insira uma pessoa válida.");
+                    MessageBox.Show("Pessoas menores de 18 anos só podem registrar transações do tipo Despesa!");
+                    return;
                 }
-                MessageBox.Show("Passou pelo IF");
-                */
+
 
                 // Insert no banco de dados
                 cmd.CommandText =   "INSERT INTO despesa(id_pessoa, descricao_despesa, valor_transacao, tipo_transacao) " +
                                     "VALUES (@id_pessoa, @descricao_despesa, @valor_transacao, @tipo_transacao);";
-                cmd.Parameters.AddWithValue("@id_pessoa", $"{pessoa}");
+                cmd.Parameters.AddWithValue("@id_pessoa", idPessoa);
                 cmd.Parameters.AddWithValue("@descricao_despesa", txtDescricaoTransacao.Text);
                 cmd.Parameters.AddWithValue("@valor_transacao", txtValorTransacao.Text);
                 cmd.Parameters.AddWithValue("@tipo_transacao", listTipoTransacao.Text);
@@ -85,7 +87,7 @@ namespace Sistema_Controle_de_Gastos_DESAFIO_TECNICO.Forms
                 carregar_TransacaoxPessoa(); // Carregar a lista de pessoas
 
                 //  Apagar campos de cadastro
-                listPessoaTransacao.Text = "";
+
                 listTipoTransacao.Text = "";
                 txtValorTransacao.Text = "";
                 txtDescricaoTransacao.Text = "";
@@ -205,6 +207,28 @@ namespace Sistema_Controle_de_Gastos_DESAFIO_TECNICO.Forms
                 item.SubItems.Add(reader["valor_transacao"].ToString());
 
                 listViewTransaçõesXPessoas.Items.Add(item);    //Cria linha para a Lista de consulta  
+            }
+        }
+        public void popularListaPessoa()
+        {
+            Conexao = new MySqlConnection(data_source);
+            Conexao.Open();
+
+            MySqlCommand cmd = new MySqlCommand();
+
+            cmd.Connection = Conexao;
+
+            // Select no banco de dados
+            cmd.CommandText = "SELECT nome FROM pessoa order by nome;";
+
+            cmd.Prepare();
+
+            MySqlDataReader reader = cmd.ExecuteReader();   // Executar reader com o valor de retorno do comando
+
+            while (reader.Read())   // Enquanto existir linhas para ler, executa o bloco abaixo 
+            {
+                // Criar colunas da lista
+                comboxPessoa.Items.Add(reader["nome"].ToString());
             }
         }
     }
