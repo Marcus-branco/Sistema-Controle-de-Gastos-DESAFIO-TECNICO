@@ -1,9 +1,4 @@
 ﻿using MySql.Data.MySqlClient;
-using System.Data;
-using System.Drawing.Text;
-using System.IO.Pipelines;
-using System.Security.Cryptography.X509Certificates;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace Sistema_Controle_de_Gastos_DESAFIO_TECNICO.Forms
 {
@@ -74,9 +69,9 @@ namespace Sistema_Controle_de_Gastos_DESAFIO_TECNICO.Forms
                 }
 
 
-                cmd.CommandText =   "SELECT id_pessoa, idade FROM pessoa " +
+                cmd.CommandText = "SELECT id_pessoa, idade FROM pessoa " +
                                     "WHERE nome = @q;";
-                cmd.Parameters.AddWithValue("@q", comboxPessoa.SelectedItem.ToString());          
+                cmd.Parameters.AddWithValue("@q", comboxPessoa.SelectedItem.ToString());
                 cmd.Prepare();
 
                 MySqlDataReader reader = cmd.ExecuteReader();
@@ -97,14 +92,14 @@ namespace Sistema_Controle_de_Gastos_DESAFIO_TECNICO.Forms
 
 
                 // Insert no banco de dados
-                cmd.CommandText =   "INSERT INTO despesa(id_pessoa, descricao_despesa, valor_transacao, tipo_transacao) " +
+                cmd.CommandText = "INSERT INTO despesa(id_pessoa, descricao_despesa, valor_transacao, tipo_transacao) " +
                                     "VALUES (@id_pessoa, @descricao_despesa, @valor_transacao, @tipo_transacao);";
                 cmd.Parameters.AddWithValue("@id_pessoa", pessoaID);
                 cmd.Parameters.AddWithValue("@descricao_despesa", txtDescricaoTransacao.Text);
                 cmd.Parameters.AddWithValue("@valor_transacao", txtValorTransacao.Text);
                 cmd.Parameters.AddWithValue("@tipo_transacao", listTipoTransacao.Text);
                 cmd.Prepare();
-                
+
                 cmd.ExecuteNonQuery();
 
                 MessageBox.Show("Transação cadastrada com sucesso!");
@@ -151,7 +146,7 @@ namespace Sistema_Controle_de_Gastos_DESAFIO_TECNICO.Forms
                 cmd.Connection = Conexao;
 
                 // Select no banco de dados
-                cmd.CommandText =   "SELECT a.id_pessoa, a.nome, a.idade, b.id_despesa, " +
+                cmd.CommandText = "SELECT a.id_pessoa, a.nome, a.idade, b.id_despesa, " +
                                     "b.descricao_despesa, b.tipo_transacao, b.valor_transacao " +
                                     "FROM pessoa a LEFT OUTER JOIN despesa b ON a.id_pessoa = b.id_pessoa " +
                                     "WHERE a.id_pessoa LIKE @q " +
@@ -207,7 +202,7 @@ namespace Sistema_Controle_de_Gastos_DESAFIO_TECNICO.Forms
             cmd.Connection = Conexao;
 
             // Select no banco de dados
-            cmd.CommandText =   "SELECT a.id_pessoa, a.nome, a.idade, b.id_despesa, " +
+            cmd.CommandText = "SELECT a.id_pessoa, a.nome, a.idade, b.id_despesa, " +
                                 "b.descricao_despesa, b.tipo_transacao, b.valor_transacao " +
                                 "FROM pessoa a LEFT OUTER JOIN despesa b ON a.id_pessoa = b.id_pessoa " +
                                 "order by a.id_pessoa;";

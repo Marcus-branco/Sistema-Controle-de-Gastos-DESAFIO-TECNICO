@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/OnlyMe/">
+    <File Path="Sistema Controle de Gastos DESAFIO TECNICO/ConexaoBanco.cs" />
+    <File Path="Sistema Controle de Gastos DESAFIO TECNICO/Organizacao.txt" />
+  </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
     <File Path="connections.cs" />
